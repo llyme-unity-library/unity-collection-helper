@@ -5,6 +5,61 @@ namespace CollectionHelper
 {
 	public static class Generic
 	{
+		public static int IndexOf<T, TValue>
+		(this IEnumerable<T> collection,
+		Func<T, TValue> selector,
+		Func<int, bool> predicate)
+		where TValue : IComparable<TValue>
+		{
+			if (collection == null)
+				return -1;
+			
+			TValue min = default;
+			int minIndex = -1;
+			bool start = false;
+			int index = 0;
+			
+			foreach (T item in collection)
+			{
+				TValue value = selector(item);
+				
+				if (!start || predicate(value.CompareTo(min)))
+				{
+					start = true;
+					min = value;
+					minIndex = index;
+				}
+				
+				index++;
+			}
+			
+			return minIndex;
+		}
+		
+		static bool IndexOfMinPredicate(int value) => value < 0;
+		
+		static bool IndexOfMaxPredicate(int value) => value > 0;
+
+		public static int IndexOfMin<T, TValue>
+		(this IEnumerable<T> collection,
+		Func<T, TValue> selector)
+		where TValue : IComparable<TValue> =>
+			IndexOf(
+				collection,
+				selector,
+				IndexOfMinPredicate
+			);
+
+		public static int IndexOfMax<T, TValue>
+		(this IEnumerable<T> collection,
+		Func<T, TValue> selector)
+		where TValue : IComparable<TValue> =>
+			IndexOf(
+				collection,
+				selector,
+				IndexOfMaxPredicate
+			);
+		
 		public static bool IsNullOrEmpty<T>(this ICollection<T> collection) =>
 			collection == null || collection.Count == 0;
 
